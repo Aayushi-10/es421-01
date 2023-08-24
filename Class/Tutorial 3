@@ -119,13 +119,17 @@ if iex == 5
     deltax = 0.4; % discretization in x
     xvec = [x0:deltax:x(end)];
     yvec(1) = y0;
+    const=2;
     for ii=1:length(xvec)
         % Apply Euler's method
+        if idiff==2 
+            const=1;
+        end
         if ii==1
             xvec(ii)=deltax;
         else
            xvec(ii)=xvec(ii-1)+deltax;
-           yvec(ii)=yvec(ii-1)+2*xvec(ii-1)*deltax;
+           yvec(ii)=yvec(ii-1)+const*xvec(ii-1)*deltax;
         end
         plot(xvec(ii),yvec(ii),'o','MarkerFaceColor','r','MarkerEdgeColor','k')
     end
@@ -134,11 +138,14 @@ if iex == 5
     xvec = [x0:deltax:x(end)];
     yvec(1) = y0;
     for ii=1:length(xvec)
+        if idiff==2 
+            const=1;
+        end
         if ii==1
             xvec(ii)=deltax;
         else
            xvec(ii)=xvec(ii-1)+deltax;
-           yvec(ii)=yvec(ii-1)+2*xvec(ii-1)*deltax;
+           yvec(ii)=yvec(ii-1)+const*xvec(ii-1)*deltax;
         end
         plot(xvec(ii),yvec(ii),'o','MarkerFaceColor','b','MarkerEdgeColor','k')
     end
@@ -152,17 +159,17 @@ if iex == 5
     
     % Inline functions for k1,k2,k3,k4
     f = dydx;
-    k1 = @(x,y) deltax * f(x, y);
+    k1 = @(x,y) (deltax * f(x, y));
+    k2 = @(x,y) (deltax*f(x+(deltax/2), y+(k1(x,y)/2)));
+    k3 = @(x,y) (deltax*f(x+(deltax/2), y+(k2(x,y)/2)));
+    k4 = @(x,y) (deltax*f(x+(deltax), y+(k3(x,y))));
     
     % loop over x
     % compute y(ii+1)
-    for ii=1:length(xvec)
-        if ii==1
-            xvec(ii)=deltax;
-        else
-            xvec(ii)=xvec(ii-1)+deltax;
-            yvec(ii)=yvec(ii-1)+k1(xvec(ii-1),yvec(ii-1));
-        end
+    for ii=1:length(xvec)-1
+           yy=yvec(ii);
+           xx=xvec(ii);
+           yvec(ii+1)=yvec(ii)+(1/6)*(k1(xx,yy)+2*k2(xx,yy)+2*k3(xx,yy)+k4(xx,yy));
         plot(xvec(ii),yvec(ii),'o','MarkerFaceColor','c','MarkerEdgeColor','k')
     end
     %--------------------
